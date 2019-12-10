@@ -8,6 +8,13 @@
 
 本工具可以方便的帮助开发者将ssh连接端口转发到本地
 
+##Mac app 下载
+
+[Download](https://github.com/watson-song/sshcrab/releases/download/1.0/SSH.Crab-Mac.zip)
+
+##PC jar 下载
+[Download](https://github.com/watson-song/sshcrab/releases/download/1.0/sshcrab.jar)
+
 #使用手册
 
 remote ssh host:port 远程SSH主机地址
