@@ -2,6 +2,10 @@
 
 ![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/sshcrab.png?raw=true)
 
+![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/ScreenShot1.png?raw=true)
+
+![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/ScreenShot2.png?raw=true)
+
 本工具可以方便的帮助开发者将ssh连接端口转发到本地
 
 #使用手册
