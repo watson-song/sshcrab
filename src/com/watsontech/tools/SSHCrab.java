@@ -351,20 +351,24 @@ public class SSHCrab extends Frame {
             this.labelForwardHost = new JLabel("转发源地址/端口 ", RIGHT);
             this.labelLocalHost = new JLabel("目标本地地址/端口 ", RIGHT);
 
-            this.labelSSHKeyPath = new JLabel("SSH公钥路径/密码 ", RIGHT);
-            this.labelSSHHostsPath = new JLabel("SSH hosts文件路径/主机账号 ", RIGHT);
+//            this.labelSSHKeyPath = new JLabel("SSH公钥路径/密码 ", RIGHT);
+//            this.labelSSHHostsPath = new JLabel("SSH hosts文件路径/主机账号 ", RIGHT);
 
-            this.textFieldSSHHost = new JTextField("SSH主机IP/域名", 8);
-            this.textFieldSSHPort = new JTextField("22", 4);
-            this.textFieldForwardHost = new JTextField("localhost", 8);
-            this.textFieldForwardPort = new JTextField("443", 4);
-            this.textFieldLocalHost = new JTextField("localhost",8);
-            this.textFieldLocalPort = new JTextField("",4);
+            this.labelSSHKeyPath = new JLabel("主机账号/密码 ", RIGHT);
+            this.labelSSHHostsPath = new JLabel("SSH私钥路径/Hosts路径 ", RIGHT);
 
-            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",8);
-            this.textFieldSSHKeyPhrase = new JTextField("",4);
-            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",8);
-            this.textFieldSSHHostUsername = new JTextField("root",4);
+            this.textFieldSSHHost = new JTextField("SSH主机IP/域名", 9);
+            this.textFieldSSHPort = new JTextField("22", 3);
+            this.textFieldForwardHost = new JTextField("localhost", 9);
+            this.textFieldForwardPort = new JTextField("443", 3);
+            this.textFieldLocalHost = new JTextField("localhost",9);
+            this.textFieldLocalPort = new JTextField("",3);
+
+            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",6);
+            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",6);
+
+            this.textFieldSSHHostUsername = new JTextField("root",6);
+            this.textFieldSSHKeyPhrase = new JTextField("~密码~",6);
 
             this.panelConfigFileChooseHost = new JPanel();
             this.panelSSHHost = new JPanel();
@@ -387,11 +391,11 @@ public class SSHCrab extends Frame {
             this.panelLocalHost.add(this.textFieldLocalHost);
             this.panelLocalHost.add(this.textFieldLocalPort);
 
-            this.panelSSHKeyPath.add(this.textFieldSSHKeyPath);
+            this.panelSSHKeyPath.add(this.textFieldSSHHostUsername);
             this.panelSSHKeyPath.add(this.textFieldSSHKeyPhrase);
 
+            this.panelSSHHostsPath.add(this.textFieldSSHKeyPath);
             this.panelSSHHostsPath.add(this.textFieldSSHHostsPath);
-            this.panelSSHHostsPath.add(this.textFieldSSHHostUsername);
 
             this.add(this.labelConfigFileChoseLabel);
             this.add(this.panelConfigFileChooseHost);
@@ -481,10 +485,18 @@ public class SSHCrab extends Frame {
                 }
             }
 
-            params.setPrivateKeyPath(textFieldSSHKeyPath.getText());
-            params.setKnowHostsPath(textFieldSSHHostsPath.getText());
-            params.setPrivateKeyPhrase(textFieldSSHKeyPhrase.getText());
-            params.setSshUserName(textFieldSSHHostUsername.getText());
+            if(!isEmpty(textFieldSSHKeyPath.getText())) {
+                params.setPrivateKeyPath(textFieldSSHKeyPath.getText());
+            }
+            if(!isEmpty(textFieldSSHHostsPath.getText())) {
+                params.setKnowHostsPath(textFieldSSHHostsPath.getText());
+            }
+            if(!isEmpty(textFieldSSHKeyPhrase.getText())) {
+                params.setPrivateKeyPhrase(textFieldSSHKeyPhrase.getText());
+            }
+            if(!isEmpty(textFieldSSHHostUsername.getText())) {
+                params.setSshUserName(textFieldSSHHostUsername.getText());
+            }
 
             if(isEmpty(params.getSshRemoteHost())) {
                 JOptionPane.showMessageDialog(null, "请输入SSH主机地址", "SSH主机地址【出错啦】", JOptionPane.ERROR_MESSAGE);
@@ -508,16 +520,22 @@ public class SSHCrab extends Frame {
                 return null;
             }
 
+            if(isEmpty(params.getPrivateKeyPhrase())&&isEmpty(params.getPrivateKeyPath())) {
+                JOptionPane.showMessageDialog(null, "请输入SSH私钥地址或用户名密码", "授权失败【出错啦】", JOptionPane.ERROR_MESSAGE);
+                updateMessageLabel("启动失败：身份认证失败【出错啦】", Color.gray);
+                return null;
+            }
+
             return params;
         }
 
         private boolean isEmpty(Object value) {
             if (value==null) return true;
-            return "".equals(value.toString());
+            return "".equals(value.toString().trim());
         }
 
         private boolean isValidHostName(String value) {
-            return value!=null&& (Pattern.compile(ipPattern).matcher(value).find()||Pattern.compile(hostPattern).matcher(value).find());
+            return value!=null&&("localhost".equalsIgnoreCase(value)||(Pattern.compile(ipPattern).matcher(value).find()||Pattern.compile(hostPattern).matcher(value).find()));
         }
 
         private String stringValue(Object value) {

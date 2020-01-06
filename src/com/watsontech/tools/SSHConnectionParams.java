@@ -3,7 +3,7 @@ package com.watsontech.tools;
 import java.io.File;
 
 public class SSHConnectionParams {
-    String privateKeyPath  = "~/.ssh/id_rsa";
+    String privateKeyPath;
     String knowHostsPath = "~/.ssh/known_hosts";
     String privateKeyPhrase;
 
@@ -19,7 +19,7 @@ public class SSHConnectionParams {
     //远程ssh主机端口
     String sshRemoteHost;
     int remoteSSHPort = 22;
-    String sshUserName = "root";
+    String sshUserName;
 
     //配置文件路径
     private File configFile;
