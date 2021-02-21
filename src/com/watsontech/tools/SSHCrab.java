@@ -74,11 +74,10 @@ public class SSHCrab extends Frame {
         this.buttonStop.setVisible(false);
 
         this.panelMessage = new JPanel();
-
-        this.panelMessage.setBorder(new EmptyBorder(10, 0, 0, 0));
+        this.panelMessage.setBorder(new EmptyBorder(0, 0, 0, 0));
 
         JScrollPane labelMessageScrollPanel = new JScrollPane();
-        labelMessageScrollPanel.setPreferredSize(new Dimension(400, 100));
+        labelMessageScrollPanel.setPreferredSize(new Dimension(350, 100));
         labelMessageScrollPanel.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         this.labelMessage = new JTextPane();
@@ -94,6 +93,7 @@ public class SSHCrab extends Frame {
         this.panelButtons.add(this.buttonConnect);
         this.panelButtons.add(this.buttonStop);
         final MainPanel mainPanel = new MainPanel();
+        mainPanel.setSize(300, 300);
 
         this.buttonConnect.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -105,7 +105,7 @@ public class SSHCrab extends Frame {
                             final SSHConnectionParams connectionParams = mainPanel.getParams();
                             if (connectionParams!=null) {
                                 conexionssh = new SSHConnection(connectionParams);
-                                conexionssh.startSSH(60, new SSHConnection.ConnectionCallback() {
+                                conexionssh.startSSH(6, new SSHConnection.ConnectionCallback() {
                                     @Override
                                     public void onConnected(Session session) {
                                         SSHCrab.this.buttonConnect.setVisible(false);
@@ -283,10 +283,9 @@ public class SSHCrab extends Frame {
         private JTextField textFieldSSHKeyPath;
         private JTextField textFieldSSHKeyPhrase;
         private JTextField textFieldSSHHostUsername;
-        private JTextField textFieldSSHHostsPath;
+//        private JTextField textFieldSSHHostsPath;
 
         private JPanel panelConfigFileChooseHost;
-
         private JPanel panelSSHHost;
         private JPanel panelForwardHost;
         private JPanel panelLocalHost;
@@ -294,7 +293,7 @@ public class SSHCrab extends Frame {
         private JPanel panelSSHHostsPath;
 
         public MainPanel() {
-            this.setBorder(new EmptyBorder(10, 20, 0, 20));
+            this.setBorder(new EmptyBorder(0, 0, 0, 0));
 
             this.labelConfigFileChoseLabel = new JLabel("选择配置文件", TRAILING);
             this.labelSelectedConfigFile = new JLabel("", TRAILING);
@@ -325,7 +324,8 @@ public class SSHCrab extends Frame {
                 }
             });
 
-            this.labelSSHHost = new JLabel("SSH主机/端口 ", TRAILING);
+            this.labelSSHHost = new JLabel("SSH主机/端口 ", RIGHT);
+
             this.labelForwardHost = new JLabel("转发源地址/端口 ", RIGHT);
             this.labelLocalHost = new JLabel("目标本地地址/端口 ", RIGHT);
 
@@ -343,7 +343,7 @@ public class SSHCrab extends Frame {
             this.textFieldLocalPort = new JTextField("",3);
 
             this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",6);
-            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",6);
+//            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",6);
 
             this.textFieldSSHHostUsername = new JTextField("root",6);
             this.textFieldSSHKeyPhrase = new JTextField("~密码~",6);
@@ -373,7 +373,7 @@ public class SSHCrab extends Frame {
             this.panelSSHKeyPath.add(this.textFieldSSHKeyPhrase);
 
             this.panelSSHHostsPath.add(this.textFieldSSHKeyPath);
-            this.panelSSHHostsPath.add(this.textFieldSSHHostsPath);
+//            this.panelSSHHostsPath.add(this.textFieldSSHHostsPath);
 
             this.add(this.labelConfigFileChoseLabel);
             this.add(this.panelConfigFileChooseHost);
@@ -386,8 +386,8 @@ public class SSHCrab extends Frame {
             this.add(this.panelLocalHost);
             this.add(this.labelSSHKeyPath);
             this.add(this.panelSSHKeyPath);
-            this.add(this.labelSSHHostsPath);
-            this.add(this.panelSSHHostsPath);
+//            this.add(this.labelSSHHostsPath);
+//            this.add(this.panelSSHHostsPath);
 
             this.loadConfigParams("config.properties");
         }
@@ -420,7 +420,7 @@ public class SSHCrab extends Frame {
 
                             textFieldSSHKeyPath.setText(stringValue(sshConnectionParams.getPrivateKeyPath()));
                             textFieldSSHKeyPhrase.setText(stringValue(sshConnectionParams.getPrivateKeyPhrase()));
-                            textFieldSSHHostsPath.setText(stringValue(sshConnectionParams.getKnowHostsPath()));
+//                            textFieldSSHHostsPath.setText(stringValue(sshConnectionParams.getKnowHostsPath()));
                             textFieldSSHHostUsername.setText(stringValue(sshConnectionParams.getSshUserName()));
                         }
                     } catch (IOException e) {
@@ -466,9 +466,9 @@ public class SSHCrab extends Frame {
             if(!isEmpty(textFieldSSHKeyPath.getText())) {
                 params.setPrivateKeyPath(textFieldSSHKeyPath.getText());
             }
-            if(!isEmpty(textFieldSSHHostsPath.getText())) {
-                params.setKnowHostsPath(textFieldSSHHostsPath.getText());
-            }
+//            if(!isEmpty(textFieldSSHHostsPath.getText())) {
+//                params.setKnowHostsPath(textFieldSSHHostsPath.getText());
+//            }
             if(!isEmpty(textFieldSSHKeyPhrase.getText())) {
                 params.setPrivateKeyPhrase(textFieldSSHKeyPhrase.getText());
             }

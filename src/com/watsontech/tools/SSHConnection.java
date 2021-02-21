@@ -27,13 +27,15 @@ public class SSHConnection {
 
     private Session session; //represents each ssh session
     private SSHConnectionParams connectionParams;
+    private boolean isConnected = false;
 
     public void closeSSH() {
         session.disconnect();
         logger.info("SSH断开连接？{}", !session.isConnected());//这里打印SSH服务器版本信息
+        isConnected = false;
     }
 
-    public void startSSH(int timeout, ConnectionCallback callback) throws JSchException {
+    public synchronized void startSSH(int timeout, ConnectionCallback callback) throws JSchException {
         checkParams();
         logger.info("准备SSH远程连接 {}", connectionParams.getSshRemoteHost() + ":" + connectionParams.getRemoteSSHPort());//这里打印SSH服务器版本信息
 
@@ -46,9 +48,47 @@ public class SSHConnection {
         logger.info("端口转发成功 远程:{} >> 本地:{}", connectionParams.getForwardFromRemoteHost()+":"+connectionParams.getForwardFromRemotePort(), connectionParams.getForwardToLocalHost()+":" + assingedPort);
         logger.info("连接状态:{}", session.getPortForwardingL());
 
+        isConnected = true;
         if (callback!=null) {
             callback.onConnected(session);
         }
+
+    }
+
+    private void runSendKeepAliveMsg() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    System.out.println("检查并发送存活跃连接...");
+                    if (isConnected) {
+                        if (session!=null) {
+                            if (session.isConnected()) {
+                                try {
+                                    session.sendKeepAliveMsg();
+                                    System.out.println("发送存活心跳连接");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }else {
+                                logger.info("SSH服务已中断，立即重新连接 {}", session.getServerVersion());//这里打印SSH服务器版本信息
+                                try {
+                                    session.connect(6000);
+                                } catch (JSchException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     public SSHConnection(SSHConnectionParams params) throws JSchException {
@@ -80,6 +120,9 @@ public class SSHConnection {
         Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
+
+        //启动定时发送keepalive心跳
+        runSendKeepAliveMsg();
     }
 
     private void checkParams() {
