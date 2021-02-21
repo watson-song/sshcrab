@@ -1,6 +1,5 @@
 package com.watsontech.tools;
 
-import com.apple.eawt.*;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import org.slf4j.Logger;
@@ -31,54 +30,31 @@ public class SSHCrab extends Frame {
     private JButton buttonConnect, buttonStop;
     SSHConnection conexionssh;
     SSHConnectionParams sshConnectionParams;
-    static Application macApplication;
+
+    public enum OS {Mac, Windows, Linux}
+
+    static OS currentOs = OS.Mac;
 
     static Image statusBarIconImage, logoIconImage;
 
     //设置mac系统dock图标
     static {
+        // 加载一个图片用于托盘图标的显示
+        logoIconImage = loadIconImage();
+
         //获得操作系统
         String OsName = System.getProperty("os.name");
         //是mac 就设置dock图标
         if (OsName.contains("Mac")) {
-            // 加载一个图片用于托盘图标的显示
-            logoIconImage = loadIconImage();
+            currentOs = OS.Mac;
 
             if(logoIconImage!=null) {
-                //指定mac 的dock图标
-                macApplication = Application.getApplication();
-                macApplication.setDockIconImage(logoIconImage);
-                macApplication.setPreferencesHandler(new PreferencesHandler() {
-                    @Override
-                    public void handlePreferences(AppEvent.PreferencesEvent preferencesEvent) {
-                        System.out.println("handle preferences "+ preferencesEvent.getSource());
-                    }
-                });
-
-                macApplication.setQuitHandler(new QuitHandler() {
-                    @Override
-                    public void handleQuitRequestWith(AppEvent.QuitEvent quitEvent, QuitResponse quitResponse) {
-                        System.out.println("app is quited" + quitEvent.toString() + quitResponse.toString());
-                    }
-                });
-
-                macApplication.setAboutHandler(new AboutHandler() {
-                    @Override
-                    public void handleAbout(AppEvent.AboutEvent aboutEvent) {
-                        System.out.println("about has been clicked" + aboutEvent.toString());
-
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                AboutWindow.MainPanel panel = new AboutWindow.MainPanel();
-                                AboutWindow win = new AboutWindow(panel);
-                            }
-                        });
-
-                    }
-                });
-
-                macApplication.setQuitStrategy(QuitStrategy.CLOSE_ALL_WINDOWS);
+                UIExtensionApple.setDockIconImage(logoIconImage);
             }
+        }else if (OsName.contains("Windows")) {
+            currentOs = OS.Windows;
+        }else {
+            currentOs = OS.Linux;
         }
     }
 
@@ -135,8 +111,8 @@ public class SSHCrab extends Frame {
                                         SSHCrab.this.buttonConnect.setVisible(false);
                                         SSHCrab.this.buttonStop.setVisible(true);
 
-                                        if(macApplication!=null) {
-                                            macApplication.setDockIconBadge("起");
+                                        if (currentOs==OS.Mac) {
+                                            UIExtensionApple.updateDockerWord("起");
                                         }
 
                                         try {
@@ -157,9 +133,10 @@ public class SSHCrab extends Frame {
                                         SSHCrab.this.buttonConnect.setVisible(true);
                                         SSHCrab.this.buttonStop.setVisible(true);
 
-                                        if(macApplication!=null) {
-                                            macApplication.setDockIconBadge("停");
+                                        if (currentOs==OS.Mac) {
+                                            UIExtensionApple.updateDockerWord("停");
                                         }
+
                                         updateMessageLabel(String.format("SSH端口连接失败"), Color.YELLOW);
                                         SSHCrab.this.setVisible(true);
                                     }
@@ -168,9 +145,10 @@ public class SSHCrab extends Frame {
                         } catch (JSchException e) {
                             e.printStackTrace();
 
-                            if(macApplication!=null) {
-                                macApplication.setDockIconBadge("失败");
+                            if (currentOs==OS.Mac) {
+                                UIExtensionApple.updateDockerWord("失败");
                             }
+
                             updateMessageLabel(String.format("启动失败：%s", e.getMessage()), Color.red);
                             conexionssh.closeSSH();
                             SSHCrab.this.buttonConnect.setVisible(true);
@@ -189,8 +167,8 @@ public class SSHCrab extends Frame {
                 SSHCrab.this.buttonStop.setVisible(false);
                 updateMessageLabel(String.format("SSH端口转发停止"), Color.ORANGE);
 
-                if(macApplication!=null) {
-                    macApplication.setDockIconBadge("停");
+                if (currentOs==OS.Mac) {
+                    UIExtensionApple.updateDockerWord("停");
                 }
             }
         });
@@ -238,9 +216,9 @@ public class SSHCrab extends Frame {
                     }
 
                     SSHCrab.this.toFront();
-                    if(macApplication!=null) {
-                        macApplication.requestForeground(true);
-                        macApplication.requestUserAttention(true);
+
+                    if (currentOs==OS.Mac) {
+                        UIExtensionApple.requestForeground();
                     }
                 }
             });
