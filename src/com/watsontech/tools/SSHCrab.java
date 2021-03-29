@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import static com.watsontech.tools.SSHCrab.OS.Mac;
 import static javax.swing.SwingConstants.RIGHT;
 import static javax.swing.SwingConstants.TRAILING;
 
@@ -27,13 +28,18 @@ public class SSHCrab extends Frame {
     static Logger logger = LoggerFactory.getLogger(SSHCrab.class);
     protected JTextPane labelMessage;
     private JPanel panelMessage, panelButtons;
+    private MainPanel mainPanel;
     private JButton buttonConnect, buttonStop;
     SSHConnection conexionssh;
     SSHConnectionParams sshConnectionParams;
 
+    public JComponent getMainPanel() {
+        return mainPanel;
+    }
+
     public enum OS {Mac, Windows, Linux}
 
-    static OS currentOs = OS.Mac;
+    static OS currentOs = Mac;
 
     static Image statusBarIconImage, logoIconImage;
 
@@ -46,7 +52,7 @@ public class SSHCrab extends Frame {
         String OsName = System.getProperty("os.name");
         //是mac 就设置dock图标
         if (OsName.contains("Mac")) {
-            currentOs = OS.Mac;
+            currentOs = Mac;
 
             if(logoIconImage!=null) {
                 UIExtensionApple.setDockIconImage(logoIconImage);
@@ -92,8 +98,8 @@ public class SSHCrab extends Frame {
         this.panelButtons.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.panelButtons.add(this.buttonConnect);
         this.panelButtons.add(this.buttonStop);
-        final MainPanel mainPanel = new MainPanel();
-        mainPanel.setSize(300, 300);
+        this.mainPanel = new MainPanel();
+        this.mainPanel.setSize(300, 300);
 
         this.buttonConnect.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -111,7 +117,9 @@ public class SSHCrab extends Frame {
                                         SSHCrab.this.buttonConnect.setVisible(false);
                                         SSHCrab.this.buttonStop.setVisible(true);
 
-                                        if (currentOs==OS.Mac) {
+                                        //更新配置到文件
+                                        saveConfigFile(connectionParams);
+                                        if (currentOs== Mac) {
                                             UIExtensionApple.updateDockerWord("起");
                                         }
 
@@ -123,9 +131,6 @@ public class SSHCrab extends Frame {
                                         }
 
                                         SSHCrab.this.setVisible(false);
-
-                                        //更新配置到文件
-                                        writeParamsToConfigFile(connectionParams);
                                     }
 
                                     @Override
@@ -133,7 +138,7 @@ public class SSHCrab extends Frame {
                                         SSHCrab.this.buttonConnect.setVisible(true);
                                         SSHCrab.this.buttonStop.setVisible(true);
 
-                                        if (currentOs==OS.Mac) {
+                                        if (currentOs== Mac) {
                                             UIExtensionApple.updateDockerWord("停");
                                         }
 
@@ -145,7 +150,7 @@ public class SSHCrab extends Frame {
                         } catch (JSchException e) {
                             e.printStackTrace();
 
-                            if (currentOs==OS.Mac) {
+                            if (currentOs== Mac) {
                                 UIExtensionApple.updateDockerWord("失败");
                             }
 
@@ -167,7 +172,7 @@ public class SSHCrab extends Frame {
                 SSHCrab.this.buttonStop.setVisible(false);
                 updateMessageLabel(String.format("SSH端口转发停止"), Color.ORANGE);
 
-                if (currentOs==OS.Mac) {
+                if (currentOs== Mac) {
                     UIExtensionApple.updateDockerWord("停");
                 }
             }
@@ -204,8 +209,8 @@ public class SSHCrab extends Frame {
             // 创建点击图标时的弹出菜单
             PopupMenu popupMenu = new PopupMenu();
 
-            MenuItem openItem = new MenuItem("Show(打开)");
-            MenuItem exitItem = new MenuItem("Quit(退出)");
+            MenuItem openItem = new MenuItem("打开(Show)");
+            MenuItem exitItem = new MenuItem("退出(Quit)");
 
             openItem.addActionListener(new ActionListener() {
                 @Override
@@ -217,7 +222,7 @@ public class SSHCrab extends Frame {
 
                     SSHCrab.this.toFront();
 
-                    if (currentOs==OS.Mac) {
+                    if (currentOs== Mac) {
                         UIExtensionApple.requestForeground();
                     }
                 }
@@ -244,6 +249,12 @@ public class SSHCrab extends Frame {
                 // 添加托盘图标到系统托盘
                 try {
                     tray.add(trayIcon);
+                    trayIcon.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            trayIcon.getPopupMenu().show(null, 0,0);
+                        }
+                    });
                 } catch (AWTException e) {
                     e.printStackTrace();
                 }
@@ -253,10 +264,6 @@ public class SSHCrab extends Frame {
         }
 
         this.setVisible(true);
-    }
-
-    private void writeParamsToConfigFile(SSHConnectionParams connectionParams) {
-
     }
 
     private void updateMessageLabel(String message, Color color) {
@@ -271,8 +278,10 @@ public class SSHCrab extends Frame {
 
     public class MainPanel extends JPanel {
 
-        private JLabel labelConfigFileChoseLabel, labelSSHHost, labelForwardHost, labelLocalHost, labelSSHKeyPath, labelSSHHostsPath, labelSelectedConfigFile;
+        private JLabel labelConfigFileChoseLabel, labelSaveConfigFileLabel, labelSSHHost, labelForwardHost, labelLocalHost, labelSSHKeyPath, labelSSHHostsPath, labelSelectedConfigFile, labelUseSSHKey;
         private JButton configFileChooseButton;
+        private JButton saveConfigFileButton;
+        private JComboBox<SSHConnectionParams.AuthType> selectBoxUseSSHKey;
         private JTextField textFieldSSHHost;
         private JTextField textFieldSSHPort;
         private JTextField textFieldForwardHost;
@@ -291,6 +300,8 @@ public class SSHCrab extends Frame {
         private JPanel panelLocalHost;
         private JPanel panelSSHKeyPath;
         private JPanel panelSSHHostsPath;
+        private JPanel panelSaveConfigFile;
+        private JPanel panelUseSSHKey;
 
         public MainPanel() {
             this.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -298,6 +309,8 @@ public class SSHCrab extends Frame {
             this.labelConfigFileChoseLabel = new JLabel("选择配置文件", TRAILING);
             this.labelSelectedConfigFile = new JLabel("", TRAILING);
             this.configFileChooseButton = new JButton("选择文件");
+            this.labelSaveConfigFileLabel = new JLabel("保存配置文件", TRAILING);
+            this.saveConfigFileButton = new JButton("保存当前配置");
 
             this.configFileChooseButton.addActionListener(new ActionListener() {
                 @Override
@@ -323,6 +336,12 @@ public class SSHCrab extends Frame {
                     }
                 }
             });
+            this.saveConfigFileButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    saveConfigFile(mainPanel.getParams());
+                }
+            });
 
             this.labelSSHHost = new JLabel("SSH主机/端口 ", RIGHT);
 
@@ -333,20 +352,24 @@ public class SSHCrab extends Frame {
 //            this.labelSSHHostsPath = new JLabel("SSH hosts文件路径/主机账号 ", RIGHT);
 
             this.labelSSHKeyPath = new JLabel("主机账号/密码 ", RIGHT);
-            this.labelSSHHostsPath = new JLabel("SSH私钥路径/Hosts路径 ", RIGHT);
+            this.labelSSHHostsPath = new JLabel("SSH私钥路径 ", RIGHT);
+            this.labelUseSSHKey = new JLabel("登陆方式 ", RIGHT);
 
             this.textFieldSSHHost = new JTextField("SSH主机IP/域名", 9);
             this.textFieldSSHPort = new JTextField("22", 3);
-            this.textFieldForwardHost = new JTextField("localhost", 9);
+            this.textFieldForwardHost = new JTextField("127.0.0.1", 9);
             this.textFieldForwardPort = new JTextField("443", 3);
             this.textFieldLocalHost = new JTextField("localhost",9);
             this.textFieldLocalPort = new JTextField("",3);
 
-            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",6);
+            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",12);
 //            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",6);
 
             this.textFieldSSHHostUsername = new JTextField("root",6);
             this.textFieldSSHKeyPhrase = new JTextField("~密码~",6);
+            this.selectBoxUseSSHKey = new JComboBox<>();
+            this.selectBoxUseSSHKey.addItem(SSHConnectionParams.AuthType.password);
+            this.selectBoxUseSSHKey.addItem(SSHConnectionParams.AuthType.key);
 
             this.panelConfigFileChooseHost = new JPanel();
             this.panelSSHHost = new JPanel();
@@ -354,8 +377,10 @@ public class SSHCrab extends Frame {
             this.panelLocalHost = new JPanel();
             this.panelSSHKeyPath = new JPanel();
             this.panelSSHHostsPath = new JPanel();
+            this.panelSaveConfigFile = new JPanel();
+            this.panelUseSSHKey = new JPanel();
 
-            GridLayout layoutManager = new GridLayout(6, 2, 0, 0);
+            GridLayout layoutManager = new GridLayout(7, 2, 0, 0);
             this.setLayout(layoutManager);  //网格式布局
 
             this.panelConfigFileChooseHost.add(this.configFileChooseButton);
@@ -375,6 +400,11 @@ public class SSHCrab extends Frame {
             this.panelSSHHostsPath.add(this.textFieldSSHKeyPath);
 //            this.panelSSHHostsPath.add(this.textFieldSSHHostsPath);
 
+            this.panelSaveConfigFile.add(this.labelSaveConfigFileLabel);
+            this.panelSaveConfigFile.add(this.saveConfigFileButton);
+
+            this.panelUseSSHKey.add(this.selectBoxUseSSHKey);
+
             this.add(this.labelConfigFileChoseLabel);
             this.add(this.panelConfigFileChooseHost);
 
@@ -386,8 +416,13 @@ public class SSHCrab extends Frame {
             this.add(this.panelLocalHost);
             this.add(this.labelSSHKeyPath);
             this.add(this.panelSSHKeyPath);
-//            this.add(this.labelSSHHostsPath);
-//            this.add(this.panelSSHHostsPath);
+            this.add(this.labelSSHHostsPath);
+            this.add(this.panelSSHHostsPath);
+            this.add(this.labelUseSSHKey);
+            this.add(this.panelUseSSHKey);
+
+//            this.add(this.labelSaveConfigFileLabel);
+//            this.add(this.panelSaveConfigFile);
 
             this.loadConfigParams("config.properties");
         }
@@ -463,6 +498,9 @@ public class SSHCrab extends Frame {
                 }
             }
 
+            SSHConnectionParams.AuthType authType = (SSHConnectionParams.AuthType) selectBoxUseSSHKey.getSelectedItem();
+            params.setAuthType(authType);
+
             if(!isEmpty(textFieldSSHKeyPath.getText())) {
                 params.setPrivateKeyPath(textFieldSSHKeyPath.getText());
             }
@@ -519,6 +557,13 @@ public class SSHCrab extends Frame {
         private String stringValue(Object value) {
             if (isEmpty(value)) return "";
             return value.toString();
+        }
+    }
+
+    private void saveConfigFile(SSHConnectionParams connectionParams) {
+        String savedMessage = PropertiesHelper.writePropertyFile(connectionParams);
+        if (savedMessage!=null) {
+            updateMessageLabel(savedMessage, Color.gray);
         }
     }
 

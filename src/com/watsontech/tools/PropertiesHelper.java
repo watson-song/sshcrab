@@ -1,9 +1,11 @@
 package com.watsontech.tools;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -13,22 +15,28 @@ public class PropertiesHelper {
 
     public static SSHConnectionParams readPropertyFile(org.slf4j.Logger logger, String filepath) throws IOException {
         SSHConnectionParams params = new SSHConnectionParams();
-        logger.info("读取配置文件{}", filepath);
+        logger.info("准备读取本地配置文件{}", filepath);
 
         Properties properties = new Properties();
+        //首先检查当前路径下是否有config.properties文件
         File configFile = new File(filepath);
         if (!configFile.exists()) {
-            // 使用ClassLoader加载properties配置文件生成对应的输入流
-            try {
-                filepath = SSHCrab.class.getClassLoader().getResource(filepath).toURI().getPath();
-                configFile = new File(filepath);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
+            logger.info("当前目录未找到配置文件："+filepath);
 
-            if (!configFile.exists()) {
-                filepath = System.getProperty("user.dir")+ File.separatorChar+filepath;
-                configFile = new File(filepath);
+            File tmpFile = new File(System.getProperty("user.dir")+ File.separatorChar+filepath);
+            if (tmpFile.exists()) {
+                configFile = tmpFile;
+            }
+        }
+        if (!configFile.exists()) {
+            logger.info("启动目录未找到配置文件："+filepath);
+
+            //最后检查个人主目录下是否有.sshscrab/config.properties文件
+            File tmpFile = new File(System.getProperty("user.home")+ File.separatorChar+".sshscrab"+ File.separatorChar+filepath);
+            if (tmpFile.exists()) {
+                configFile = tmpFile;
+            }else {
+                logger.info("用户主目录未找到配置文件："+filepath);
             }
         }
 
@@ -36,7 +44,7 @@ public class PropertiesHelper {
             logger.info("本地配置文件已找到，路径为：{}", configFile.getAbsolutePath());
             params.setConfigFile(configFile);
         }else {
-            logger.info("本地配置文件已找到，路径为:{}", filepath);
+            logger.info("本地配置文件未找到配置文件：{}", filepath);
             return null;
         }
 
@@ -48,7 +56,7 @@ public class PropertiesHelper {
             try {
                 parseRHPParams(rhp, params);
             }catch (NumberFormatException e) {
-                System.out.println("remote host port should be integer");
+                logger.info("remote host port should be integer");
                 return null;
             }
         } else if(properties.getProperty("rh")!=null) {
@@ -63,7 +71,7 @@ public class PropertiesHelper {
             try {
                 parseFRHPParams(frhp, params);
             }catch (NumberFormatException e) {
-                System.out.println("forward remote host port should be integer");
+                logger.info("forward remote host port should be integer");
                 return null;
             }
         } else {
@@ -75,22 +83,31 @@ public class PropertiesHelper {
             try {
                 parseFLHPParams(flhp, params);
             }catch (NumberFormatException e) {
-                System.out.println("forward local host port should be integer");
+                logger.info("forward local host port should be integer");
                 return null;
             }
         } else if(properties.getProperty("flh")!=null) {
             String flh = properties.getProperty("flhp");
             params.setForwardToLocalHost(flh);
             params.setForwardToLocalPort(params.getForwardFromRemotePort());
-            System.out.println("No localport configuration. default local port same as remote, current is "+params.getForwardToLocalPort());
+            logger.info("No localport configuration. default local port same as remote, current is "+params.getForwardToLocalPort());
         } else {
             params.setForwardToLocalPort(params.getForwardFromRemotePort());
-            System.out.println("No localhost configuration. default host is 'localhost', port is same as remote, current is "+params.getForwardToLocalPort());
+            logger.info("No localhost configuration. default host is 'localhost', port is same as remote, current is "+params.getForwardToLocalPort());
         }
 
         String u = properties.getProperty("u");
         if( u!=null ) {
             params.setSshUserName(u);
+        }
+
+        String at = properties.getProperty("at");
+        if( at!=null ) {
+            try {
+                params.setAuthType(SSHConnectionParams.AuthType.valueOf(at));
+            }catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
         String skp = properties.getProperty("skp");
@@ -100,7 +117,7 @@ public class PropertiesHelper {
                 params.setPrivateKeyPath(keyPharse[0]);
             }
             if (keyPharse.length>1) {
-                params.setPrivateKeyPhrase(keyPharse[1]);
+                params.setPrivateKeyPhrase(Base64Util.decode(keyPharse[1]));
             }
         }else if (properties.getProperty("sk")!=null) {
             String sk = properties.getProperty("sk");
@@ -110,29 +127,117 @@ public class PropertiesHelper {
         return params;
     }
 
-    private static void parseFLHPParams(String flhp, SSHConnectionParams params) throws NumberFormatException {
+    public static String writePropertyFile(SSHConnectionParams connectionParams) {
+        if (connectionParams==null) return null;
+
+        Properties properties = new Properties();
+        //首先检查当前路径下是否有config.properties文件
+        properties.put("rhp", wrapRHPParams(connectionParams));
+        properties.put("frhp", wrapFRHPParams(connectionParams));
+        properties.put("flhp", wrapFLHPParams(connectionParams));
+        properties.put("u", connectionParams.getSshUserName());
+        properties.put("skp", wrapSKPParams(connectionParams));
+
+        if (connectionParams.getAuthType()!=null) {
+            properties.put("at", connectionParams.getAuthType().name());
+        }
+        // 使用properties对象加载输入流
+        String configFileDir = System.getProperty("user.home")+ File.separatorChar+".sshscrab";
+        String configFilePath = configFileDir + File.separatorChar+"config.properties";
+        try {
+            File configFile = new File(configFilePath);
+            if (!configFile.exists()) {
+                if(!new File(configFileDir).exists()) {
+                    if(!new File(configFileDir).mkdirs()) {
+                        return "创建目录失败："+configFileDir;
+                    }
+                }
+
+                if(!configFile.createNewFile()) {
+                    return "创建配置文件失败："+configFilePath;
+                }
+            }
+            FileWriter fw = new FileWriter(configFile);
+            properties.store(fw, "saved in "+ DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now()));
+            fw.close();
+            return "配置已保存："+configFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "配置保存异常："+e.getMessage();
+        }
+    }
+
+    private static void parseFLHPParams(String flhp, SSHConnectionParams params) {
         String[] localHostPort = flhp.split(":");
         if (localHostPort.length>0) {
             params.setForwardToLocalHost(localHostPort[0]);
         }
         if(localHostPort.length>1) {
-            params.setForwardToLocalPort(Integer.parseInt(localHostPort[1]));
+            try {
+                params.setForwardToLocalPort(Integer.parseInt(localHostPort[1]));
+            }catch (NumberFormatException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
-    private static void parseFRHPParams(String frhp, SSHConnectionParams params) throws NumberFormatException {
+    private static String wrapSKPParams(SSHConnectionParams params) {
+        String skp = "";
+        if (params.getPrivateKeyPath()!=null) {
+            skp +=params.getPrivateKeyPath();
+        }
+        skp +="@"+Base64Util.encode(params.getPrivateKeyPhrase());
+        return skp;
+    }
+
+    private static String wrapFLHPParams(SSHConnectionParams params) {
+        String flhp = "";
+        if (params.getForwardToLocalHost()!=null) {
+            flhp +=params.getForwardToLocalHost();
+        }
+        flhp +=":"+params.getForwardToLocalPort();
+        return flhp;
+    }
+
+    private static void parseFRHPParams(String frhp, SSHConnectionParams params) {
         String[] remoteHostPort = frhp.split(":");
         if (remoteHostPort.length>0) {
             params.setForwardFromRemoteHost(remoteHostPort[0]);
         }
         if(remoteHostPort.length>1) {
-            params.setForwardFromRemotePort(Integer.parseInt(remoteHostPort[1]));
+            try {
+                params.setForwardFromRemotePort(Integer.parseInt(remoteHostPort[1]));
+            }catch (NumberFormatException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
-    private static void parseRHPParams(String rhp, SSHConnectionParams params) throws NumberFormatException {
+    private static String wrapFRHPParams(SSHConnectionParams params) {
+        String frhp = "";
+        if (params.getForwardFromRemoteHost()!=null) {
+            frhp +=params.getForwardFromRemoteHost();
+        }
+        frhp +=":"+params.getForwardFromRemotePort();
+        return frhp;
+    }
+
+    private static void parseRHPParams(String rhp, SSHConnectionParams params) {
         String[] remoteHostPort = rhp.split(":");
         params.setSshRemoteHost(remoteHostPort[0]);
-        params.setRemoteSSHPort(Integer.parseInt(remoteHostPort[1]));
+        try {
+            params.setRemoteSSHPort(Integer.parseInt(remoteHostPort[1]));
+        }catch (NumberFormatException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static String wrapRHPParams(SSHConnectionParams params) {
+        String rhp = "";
+        if (params.getSshRemoteHost()!=null) {
+            rhp +=params.getSshRemoteHost();
+        }
+        rhp +=":"+params.getRemoteSSHPort();
+        return rhp;
     }
 }

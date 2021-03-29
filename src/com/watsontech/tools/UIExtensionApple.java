@@ -1,8 +1,5 @@
 package com.watsontech.tools;
 
-import com.apple.eawt.Application;
-
-import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
@@ -10,80 +7,84 @@ import java.lang.reflect.InvocationTargetException;
  * Created by Watson on 2021/2/21.
  */
 public class UIExtensionApple {
-    static com.apple.eawt.Application macApplication;
-
-    public void loadDockImage(JFrame frame, String fileName) {
-        // Retrieve the Image object from the locally stored image file
-        // "frame" is the name of my JFrame variable, and "filename" is the name of the image file
-        Image image = Toolkit.getDefaultToolkit().getImage(frame.getClass().getResource(fileName));
-
+//    static com.apple.eawt.Application macApplication;
+    static Object macApplication;
+    static {
+        // Replace: import com.apple.eawt.Application
+        String className = "com.apple.eawt.Application";
+        Class<?> cls = null;
         try {
-            // Replace: import com.apple.eawt.Application
-            String className = "com.apple.eawt.Application";
-            Class<?> cls = Class.forName(className);
+            cls = Class.forName(className);
 
             // Replace: Application application = Application.getApplication();
-            Object application = cls.newInstance().getClass().getMethod("getApplication")
-                    .invoke(null);
-
-            // Replace: application.setDockIconImage(image);
-            application.getClass().getMethod("setDockIconImage", java.awt.Image.class)
-                    .invoke(application, image);
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException
-                | InstantiationException e) {
+            macApplication = cls.newInstance().getClass().getMethod("getApplication").invoke(null);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
-    public static void setDockIconImage(Image logoIconImage) {
-        //指定mac 的dock图标
-        Application macApplication = com.apple.eawt.Application.getApplication();
-        macApplication.setDockIconImage(logoIconImage);
-        macApplication.setPreferencesHandler(new com.apple.eawt.PreferencesHandler() {
-            @Override
-            public void handlePreferences(com.apple.eawt.AppEvent.PreferencesEvent preferencesEvent) {
-                System.out.println("handle preferences "+ preferencesEvent.getSource());
-            }
-        });
+    public static void setDockIconImage(Image image) {
+        if(UIExtensionApple.macApplication==null) return;
 
-        macApplication.setQuitHandler(new com.apple.eawt.QuitHandler() {
-            @Override
-            public void handleQuitRequestWith(com.apple.eawt.AppEvent.QuitEvent quitEvent, com.apple.eawt.QuitResponse quitResponse) {
-                System.out.println("app is quited" + quitEvent.toString() + quitResponse.toString());
-            }
-        });
+        // Retrieve the Image object from the locally stored image file
+        // "frame" is the name of my JFrame variable, and "filename" is the name of the image file
+//        Image image = Toolkit.getDefaultToolkit().getImage(frame.getClass().getResource(fileName));
 
-        macApplication.setAboutHandler(new com.apple.eawt.AboutHandler() {
-            @Override
-            public void handleAbout(com.apple.eawt.AppEvent.AboutEvent aboutEvent) {
-                System.out.println("about has been clicked" + aboutEvent.toString());
-
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        AboutWindow.MainPanel panel = new AboutWindow.MainPanel();
-                        AboutWindow win = new AboutWindow(panel);
-                    }
-                });
-
-            }
-        });
-
-        macApplication.setQuitStrategy(com.apple.eawt.QuitStrategy.CLOSE_ALL_WINDOWS);
-
-        UIExtensionApple.macApplication = macApplication;
+        // Replace: application.setDockIconImage(image);
+        try {
+            UIExtensionApple.macApplication.getClass().getMethod("setDockIconImage", Image.class)
+                    .invoke(UIExtensionApple.macApplication, image);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void updateDockerWord(String word) {
         if(macApplication!=null) {
-            macApplication.setDockIconBadge(word);
+            try {
+                macApplication.getClass().getMethod("setDockIconBadge", String.class)
+                        .invoke(macApplication, word);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+
+//            macApplication.setDockIconBadge(word);
         }
     }
 
     public static void requestForeground() {
         if(macApplication!=null) {
-            macApplication.requestForeground(true);
-            macApplication.requestUserAttention(true);
+            try {
+                macApplication.getClass().getMethod("requestForeground", boolean.class)
+                        .invoke(macApplication, true);
+                macApplication.getClass().getMethod("requestUserAttention", boolean.class)
+                        .invoke(macApplication, true);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+
+//            macApplication.requestForeground(true);
+//            macApplication.requestUserAttention(true);
         }
     }
 }

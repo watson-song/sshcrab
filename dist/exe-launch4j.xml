@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>D:\cp_project\sshcrab\classes\artifacts\sshcrab_jar\sshcrab.jar</jar>
+  <outfile>D:\cp_project\sshcrab\classes\artifacts\sshcrab_jar\sshcrabv0.1.exe</outfile>
+  <errTitle>对不起，当前软件需要Java运行环境支撑，请下载JRE运行当前软件</errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest>D:\cp_project\sshcrab\src\META-INF\MANIFEST.MF</manifest>
+  <icon>D:\cp_project\sshcrab\src\res\sshscrab-128windows.ico</icon>
+  <jre>
+    <path>C:\Program Files\Java\jdk1.8.0_65</path>
+    <bundledJre64Bit>true</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <minVersion></minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
+  </jre>
+</launch4jConfig>

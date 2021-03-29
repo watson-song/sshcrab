@@ -87,11 +87,6 @@ public class CMDApplication {
             System.out.println("No localhost configuration. default host is 'localhost', port is same as remote, current is "+params.getForwardToLocalPort());
         }
 
-        String u = properties.getProperty("u");
-        if( u!=null ) {
-            params.setSshUserName(u);
-        }
-
         String skp = properties.getProperty("skp");
         if(skp!=null) {
             String[] keyPharse = skp.split("@");
@@ -99,7 +94,7 @@ public class CMDApplication {
                 params.setPrivateKeyPath(keyPharse[0]);
             }
             if (keyPharse.length>1) {
-                params.setPrivateKeyPhrase(keyPharse[1]);
+                params.setPrivateKeyPhrase(Base64Util.decode(keyPharse[1]));
             }
         }else if (properties.getProperty("sk")!=null) {
             String sk = properties.getProperty("sk");
@@ -203,11 +198,6 @@ public class CMDApplication {
         } else {
             params.setForwardToLocalPort(params.getForwardFromRemotePort());
             System.out.println("No localhost configuration. default host is 'localhost', port is same as remote, current is "+params.getForwardToLocalPort());
-        }
-
-        if( commandLine.hasOption("u") ) {
-            String username = commandLine.getOptionValue("u");
-            params.setSshUserName(username);
         }
         if(commandLine.hasOption("skp")) {
             String skp = commandLine.getOptionValue("skp");

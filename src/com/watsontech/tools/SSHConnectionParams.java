@@ -6,6 +6,23 @@ public class SSHConnectionParams {
     String privateKeyPath;
     String knowHostsPath = "~/.ssh/known_hosts";
     String privateKeyPhrase;
+    enum AuthType {
+        key("SSH密钥登陆"),password("密码登陆");
+        String label;
+
+        AuthType(String label) {
+            this.label = label;
+        }
+
+        public String label() {return label;}
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+    //默认密码
+    AuthType authType = AuthType.password;
 
     //代理到本地端口
     //by security policy, you must connect through a fowarded port
@@ -144,5 +161,13 @@ public class SSHConnectionParams {
 
     public File getConfigFile() {
         return configFile;
+    }
+
+    public AuthType getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(AuthType authType) {
+        this.authType = authType;
     }
 }

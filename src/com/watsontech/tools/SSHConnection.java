@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 
 public class SSHConnection {
-
     public boolean isConnected() {
         return session!=null&&session.isConnected();
     }
@@ -27,12 +26,12 @@ public class SSHConnection {
 
     private Session session; //represents each ssh session
     private SSHConnectionParams connectionParams;
-    private boolean isConnected = false;
+    private volatile boolean isConnected = false;
 
     public void closeSSH() {
+        isConnected = false;
         session.disconnect();
         logger.info("SSH断开连接？{}", !session.isConnected());//这里打印SSH服务器版本信息
-        isConnected = false;
     }
 
     public synchronized void startSSH(int timeout, ConnectionCallback callback) throws JSchException {
@@ -49,34 +48,34 @@ public class SSHConnection {
         logger.info("连接状态:{}", session.getPortForwardingL());
 
         isConnected = true;
+
+        //启动定时发送keepalive心跳
+        runSendKeepAliveMsg();
         if (callback!=null) {
             callback.onConnected(session);
         }
-
     }
 
     private void runSendKeepAliveMsg() {
-        new Thread(new Runnable() {
+        Thread keepAliveThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    System.out.println("检查并发送存活跃连接...");
-                    if (isConnected) {
-                        if (session!=null) {
-                            if (session.isConnected()) {
-                                try {
-                                    session.sendKeepAliveMsg();
-                                    System.out.println("发送存活心跳连接");
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }else {
-                                logger.info("SSH服务已中断，立即重新连接 {}", session.getServerVersion());//这里打印SSH服务器版本信息
-                                try {
-                                    session.connect(6000);
-                                } catch (JSchException e) {
-                                    e.printStackTrace();
-                                }
+                while (isConnected) {
+                    logger.info("检查并发送存活跃连接...");
+                    if (session!=null) {
+                        if (session.isConnected()) {
+                            try {
+                                session.sendKeepAliveMsg();
+                                logger.info("发送存活心跳连接");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }else {
+                            logger.info("SSH服务已中断，立即重新连接 {}", session.getServerVersion());//这里打印SSH服务器版本信息
+                            try {
+                                session.connect(6000);
+                            } catch (JSchException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -88,7 +87,10 @@ public class SSHConnection {
                     }
                 }
             }
-        }).start();
+        });
+
+        keepAliveThread.setDaemon(true);
+        keepAliveThread.start();
     }
 
     public SSHConnection(SSHConnectionParams params) throws JSchException {
@@ -104,25 +106,27 @@ public class SSHConnection {
 
             @Override
             public void log(int level, String message) {
-                System.out.println(message);
+                logger.info(message);
             }
         });
-        if (connectionParams.getKnowHostsPath()!=null) {
-            jsch.setKnownHosts(connectionParams.getKnowHostsPath());
-        }
-        if (connectionParams.getPrivateKeyPath()!=null) {
-            jsch.addIdentity(connectionParams.getPrivateKeyPath(), connectionParams.getPrivateKeyPhrase());
+
+        if(connectionParams.getAuthType()==null||connectionParams.getAuthType()== SSHConnectionParams.AuthType.key) {
+            if (connectionParams.getKnowHostsPath()!=null) {
+                jsch.setKnownHosts(connectionParams.getKnowHostsPath());
+            }
+            if (connectionParams.getPrivateKeyPath()!=null) {
+                jsch.addIdentity(connectionParams.getPrivateKeyPath(), connectionParams.getPrivateKeyPhrase());
+            }
         }
 
         session = jsch.getSession(connectionParams.getSshUserName(), connectionParams.getSshRemoteHost(), connectionParams.getRemoteSSHPort());
-        session.setPassword(connectionParams.getPrivateKeyPhrase());
+        if(connectionParams.getAuthType()==null||connectionParams.getAuthType()== SSHConnectionParams.AuthType.password) {
+            session.setPassword(connectionParams.getPrivateKeyPhrase());
+        }
 
         Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
-
-        //启动定时发送keepalive心跳
-        runSendKeepAliveMsg();
     }
 
     private void checkParams() {
