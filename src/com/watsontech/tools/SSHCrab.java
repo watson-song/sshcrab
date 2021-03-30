@@ -9,10 +9,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -362,14 +359,35 @@ public class SSHCrab extends Frame {
             this.textFieldLocalHost = new JTextField("localhost",9);
             this.textFieldLocalPort = new JTextField("",3);
 
-            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",12);
+            this.textFieldSSHKeyPath = new JTextField("~/.ssh/id_rsa",13);
 //            this.textFieldSSHHostsPath = new JTextField("~/.ssh/known_hosts",6);
 
-            this.textFieldSSHHostUsername = new JTextField("root",6);
-            this.textFieldSSHKeyPhrase = new JTextField("~密码~",6);
+            this.textFieldSSHHostUsername = new JTextField("root",4);
+            this.textFieldSSHKeyPhrase = new JTextField("~密码~",8);
             this.selectBoxUseSSHKey = new JComboBox<>();
             this.selectBoxUseSSHKey.addItem(SSHConnectionParams.AuthType.password);
             this.selectBoxUseSSHKey.addItem(SSHConnectionParams.AuthType.key);
+            this.selectBoxUseSSHKey.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    System.out.println("selected id:"+e.getID());
+                    if(e.getStateChange()==ItemEvent.SELECTED) {
+                        SSHConnectionParams.AuthType authType = (SSHConnectionParams.AuthType) e.getItem();
+                        switch (authType) {
+                            case key:
+                                panelSSHHostsPath.setVisible(true);
+                                labelSSHHostsPath.setVisible(true);
+                                labelSSHKeyPath.setText("主机账号/SSH密钥密码");
+                                break;
+                            default:
+                                panelSSHHostsPath.setVisible(false);
+                                labelSSHHostsPath.setVisible(false);
+                                labelSSHKeyPath.setText("主机账号/密码 ");
+                                break;
+                        }
+                    }
+                }
+            });
 
             this.panelConfigFileChooseHost = new JPanel();
             this.panelSSHHost = new JPanel();
@@ -414,12 +432,12 @@ public class SSHCrab extends Frame {
             this.add(this.panelForwardHost);
             this.add(this.labelLocalHost);
             this.add(this.panelLocalHost);
+            this.add(this.labelUseSSHKey);
+            this.add(this.panelUseSSHKey);
             this.add(this.labelSSHKeyPath);
             this.add(this.panelSSHKeyPath);
             this.add(this.labelSSHHostsPath);
             this.add(this.panelSSHHostsPath);
-            this.add(this.labelUseSSHKey);
-            this.add(this.panelUseSSHKey);
 
 //            this.add(this.labelSaveConfigFileLabel);
 //            this.add(this.panelSaveConfigFile);
@@ -457,6 +475,7 @@ public class SSHCrab extends Frame {
                             textFieldSSHKeyPhrase.setText(stringValue(sshConnectionParams.getPrivateKeyPhrase()));
 //                            textFieldSSHHostsPath.setText(stringValue(sshConnectionParams.getKnowHostsPath()));
                             textFieldSSHHostUsername.setText(stringValue(sshConnectionParams.getSshUserName()));
+                            selectBoxUseSSHKey.setSelectedItem(sshConnectionParams.getAuthType());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

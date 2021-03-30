@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo 'Hello, SSH Scrab'
+java -jar sshcrab.jar
