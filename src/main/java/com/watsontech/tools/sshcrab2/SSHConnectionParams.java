@@ -1,4 +1,4 @@
-package com.watsontech.tools;
+package com.watsontech.tools.sshcrab2;
 
 import java.io.File;
 
@@ -169,5 +169,23 @@ public class SSHConnectionParams {
 
     public void setAuthType(AuthType authType) {
         this.authType = authType;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "privateKeyPath='" + privateKeyPath + '\'' +
+                ", knowHostsPath='" + knowHostsPath + '\'' +
+                ", privateKeyPhrase='" + privateKeyPhrase + '\'' +
+                ", authType=" + authType +
+                ", forwardToLocalPort=" + forwardToLocalPort +
+                ", forwardToLocalHost='" + forwardToLocalHost + '\'' +
+                ", forwardFromRemotePort=" + forwardFromRemotePort +
+                ", forwardFromRemoteHost='" + forwardFromRemoteHost + '\'' +
+                ", sshRemoteHost='" + sshRemoteHost + '\'' +
+                ", remoteSSHPort=" + remoteSSHPort +
+                ", sshUserName='" + sshUserName + '\'' +
+                ", configFile=" + configFile +
+                '}';
     }
 }

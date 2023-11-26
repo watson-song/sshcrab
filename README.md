@@ -12,8 +12,8 @@
 
 [Download](https://github.com/watson-song/sshcrab/releases/download/1.0/SSH.Crab-Mac.zip)
 
-##PC jar 下载
-[Download](https://github.com/watson-song/sshcrab/releases/download/1.0/sshcrab.jar)
+##PC 2.0 app 下载
+[Download](https://github.com/watson-song/sshcrab/releases/download/2.0/sshcrab2.zip)
 
 #使用手册
 
@@ -31,3 +31,5 @@ username ssh用户名
 
 privateKeyPath@keyPhrase  私钥路径@密码(若有)
 #skp=~/.ssh/id_rsa@password
+
+C:\Users\Watson\.jdks\corretto-17.0.3\bin\jpackage --name SSHScrap2.0 --type app-image  -m com.watsontech.tools.sshcrap2/com.watsontech.tools.sshcrap2.SSHCrabApplication  --runtime-image .\target\app\

@@ -1,4 +1,4 @@
-package com.watsontech.tools;
+package com.watsontech.tools.sshcrab2;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;

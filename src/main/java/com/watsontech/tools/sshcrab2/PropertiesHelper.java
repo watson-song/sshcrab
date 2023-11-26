@@ -1,17 +1,20 @@
-package com.watsontech.tools;
+package com.watsontech.tools.sshcrab2;
 
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * Created by Watson on 2019/12/10.
  */
 public class PropertiesHelper {
+    public static final String userDefaultConfigDirName = ".sshcrab";
+    public static final String userDefaultConfigFileName = "config.properties";
+    public static final String userDefaultConfigFilePath = System.getProperty("user.home")+File.separatorChar+userDefaultConfigDirName+File.separatorChar+userDefaultConfigFileName;
 
     public static SSHConnectionParams readPropertyFile(org.slf4j.Logger logger, String filepath) throws IOException {
         SSHConnectionParams params = new SSHConnectionParams();
@@ -32,7 +35,7 @@ public class PropertiesHelper {
             logger.info("启动目录未找到配置文件："+filepath);
 
             //最后检查个人主目录下是否有.sshscrab/config.properties文件
-            File tmpFile = new File(System.getProperty("user.home")+ File.separatorChar+".sshscrab"+ File.separatorChar+filepath);
+            File tmpFile = new File(System.getProperty("user.home")+ File.separatorChar+userDefaultConfigDirName+ File.separatorChar+filepath);
             if (tmpFile.exists()) {
                 configFile = tmpFile;
             }else {
@@ -142,8 +145,8 @@ public class PropertiesHelper {
             properties.put("at", connectionParams.getAuthType().name());
         }
         // 使用properties对象加载输入流
-        String configFileDir = System.getProperty("user.home")+ File.separatorChar+".sshscrab";
-        String configFilePath = configFileDir + File.separatorChar+"config.properties";
+        String configFileDir = System.getProperty("user.home") + File.separatorChar + userDefaultConfigDirName;
+        String configFilePath = configFileDir + File.separatorChar + userDefaultConfigFileName;
         try {
             File configFile = new File(configFilePath);
             if (!configFile.exists()) {

@@ -1,4 +1,4 @@
-package com.watsontech.tools;
+package com.watsontech.tools.sshcrab2;
 
 /**
  * Created by Watson on 2018/12/12.
@@ -115,7 +115,12 @@ public class SSHConnection {
                 jsch.setKnownHosts(connectionParams.getKnowHostsPath());
             }
             if (connectionParams.getPrivateKeyPath()!=null) {
-                jsch.addIdentity(connectionParams.getPrivateKeyPath(), connectionParams.getPrivateKeyPhrase());
+                try {
+                    jsch.addIdentity(connectionParams.getPrivateKeyPath(), connectionParams.getPrivateKeyPhrase());
+                }catch (JSchException jSchException) {
+                    throw new IllegalArgumentException("SSH秘钥路径不正确："+connectionParams.getPrivateKeyPath()+"，密码："+connectionParams.getPrivateKeyPhrase());
+                }
+
             }
         }
 

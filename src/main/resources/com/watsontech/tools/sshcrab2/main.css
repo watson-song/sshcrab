@@ -1,0 +1,17 @@
+.scroll-pane {
+    -fx-background-radius: 5px;
+    -fx-color: #A4A4A4;
+    -fx-padding: 5px;
+}
+.scroll-pane .label {
+    -fx-background-radius: 2px;
+    -fx-background-color: #F79F31;
+}
+.scroll-pane .image-view {
+    -fx-position: absolute;
+    -fx-background-color: red;
+}
+.normalButton{
+    -fx-background-radius: 45px;
+    -fx-background-color: #333333;
+}
