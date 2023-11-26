@@ -1,2 +1,4 @@
 out
-sshcrab.iml
+*.iml
+/target/*
+/.idea/*
