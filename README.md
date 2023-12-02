@@ -1,10 +1,14 @@
 # sshcrab 远程发蟹
 
-![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/sshcrab.png?raw=true)
+#最新的Windows10+ 应用预览
+![Image text](https://github.com/watson-song/sshcrab/assets/7800970/c23ff58c-07d8-47f0-a0f0-3f724f9897b7?raw=true)
 
-![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/ScreenShot1.png?raw=true)
+#Mac Version
+![Image text](https://github.com/watson-song/sshcrab/blob/master/src/main/resources/sshcrab.png?raw=true)
 
-![Image text](https://github.com/watson-song/sshcrab/blob/master/src/res/ScreenShot2.png?raw=true)
+![Image text](https://github.com/watson-song/sshcrab/blob/master/src/main/resources/ScreenShot1.png?raw=true)
+
+![Image text](https://github.com/watson-song/sshcrab/blob/master/src/main/resources/ScreenShot2.png?raw=true)
 
 本工具可以方便的帮助开发者将ssh连接端口转发到本地
 
@@ -13,7 +17,7 @@
 [Download](https://github.com/watson-song/sshcrab/releases/download/1.0/SSH.Crab-Mac.zip)
 
 ##PC 2.0 app 下载
-[Download](https://github.com/watson-song/sshcrab/releases/download/2.0/sshcrab2.zip)
+[Download](https://github.com/watson-song/sshcrab/releases/download/2.0/SSHCrab-2.0.msi)
 
 #使用手册
 
