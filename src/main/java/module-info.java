@@ -1,4 +1,4 @@
-module com.watsontech.tools.sshcrap2 {
+module com.watsontech.tools.sshcrab2 {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;

@@ -95,52 +95,53 @@
                             <mainClass>com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication
                             </mainClass>
 <!--                            <vendor>Watson Tech.Ltd</vendor>-->
-<!--                            <jlinkZipName>SSHCrab-V2.0</jlinkZipName>-->
-<!--                            <jlinkImageName>image</jlinkImageName>-->
-<!--                            <noManPages>true</noManPages>-->
-<!--                            <stripDebug>true</stripDebug>-->
-<!--                            <noHeaderFiles>true</noHeaderFiles>-->
+<!--                            <launcher>SSHCrab</launcher>-->
+<!--                            <jlinkZipName>SSHCrab</jlinkZipName>-->
+<!--                            <jlinkImageName>SSHCrab</jlinkImageName>-->
+                            <noManPages>true</noManPages>
+                            <stripDebug>true</stripDebug>
+                            <noHeaderFiles>true</noHeaderFiles>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
 
-        <!--        <resources>-->
-        <!--            <resource>-->
-        <!--                &lt;!&ndash;把src/main/java目录下的properties、xm文件打包打进程序中&ndash;&gt;-->
-        <!--                <directory>src/main/java</directory>-->
-        <!--                <includes>-->
-        <!--                    <include>**/*.properties</include>-->
-        <!--                    <include>**/*.xml</include>-->
-        <!--                </includes>-->
-        <!--                <filtering>false</filtering>-->
-        <!--            </resource>-->
+<!--        <resources>-->
+<!--            <resource>-->
+<!--                &lt;!&ndash;把src/main/java目录下的properties、xm文件打包打进程序中&ndash;&gt;-->
+<!--                <directory>src/main/java</directory>-->
+<!--                <includes>-->
+<!--                    <include>**/*.properties</include>-->
+<!--                    <include>**/*.xml</include>-->
+<!--                </includes>-->
+<!--                <filtering>false</filtering>-->
+<!--            </resource>-->
 
-        <!--            <resource>-->
-        <!--                &lt;!&ndash;把src/main/resources目录下的properties、xml、css文件打包打进程序中&ndash;&gt;-->
-        <!--                <directory>src/main/resources</directory>-->
-        <!--                <includes>-->
-        <!--                    <include>**/*.properties</include>-->
-        <!--                    <include>**/*.xml</include>-->
-        <!--                    <include>**/*.fxml</include>-->
-        <!--                    <include>**/*.css</include>-->
-        <!--                    <include>**/*.setting</include>-->
-        <!--                    <include>**/*.jpg</include>-->
-        <!--                    <include>**/*.png</include>-->
-        <!--                    <include>**/*.ico</include>-->
-        <!--                </includes>-->
-        <!--                <filtering>false</filtering>-->
-        <!--            </resource>-->
+<!--            <resource>-->
+<!--                &lt;!&ndash;把src/main/resources目录下的properties、xml、css文件打包打进程序中&ndash;&gt;-->
+<!--                <directory>src/main/resources</directory>-->
+<!--                <includes>-->
+<!--                    <include>**/*.properties</include>-->
+<!--                    <include>**/*.xml</include>-->
+<!--                    <include>**/*.fxml</include>-->
+<!--                    <include>**/*.css</include>-->
+<!--                    <include>**/*.setting</include>-->
+<!--                    <include>**/*.jpg</include>-->
+<!--                    <include>**/*.png</include>-->
+<!--                    <include>**/*.ico</include>-->
+<!--                </includes>-->
+<!--                <filtering>false</filtering>-->
+<!--            </resource>-->
 
-        <!--            <resource>-->
-        <!--                &lt;!&ndash;把lib/目录下第三方jar包打进程序中，如systemPath目录下的jar&ndash;&gt;-->
-        <!--                <directory>lib/</directory>-->
-        <!--                <includes>-->
-        <!--                    <include>**/*.jar</include>-->
-        <!--                </includes>-->
-        <!--                <filtering>false</filtering>-->
-        <!--            </resource>-->
-        <!--        </resources>-->
+<!--            <resource>-->
+<!--                &lt;!&ndash;把lib/目录下第三方jar包打进程序中，如systemPath目录下的jar&ndash;&gt;-->
+<!--                <directory>lib/</directory>-->
+<!--                <includes>-->
+<!--                    <include>**/*.jar</include>-->
+<!--                </includes>-->
+<!--                <filtering>false</filtering>-->
+<!--            </resource>-->
+<!--        </resources>-->
     </build>
 </project>
