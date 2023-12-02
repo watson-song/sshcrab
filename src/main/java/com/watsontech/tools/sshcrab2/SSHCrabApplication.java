@@ -2,18 +2,13 @@ package com.watsontech.tools.sshcrab2;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class SSHCrabApplication extends Application {
 
@@ -53,6 +48,10 @@ public class SSHCrabApplication extends Application {
         }
     }
 
+    static {
+        Platform.setImplicitExit(false);//隐式退出开关，设置关闭所有窗口后程序仍不退出
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
@@ -64,75 +63,11 @@ public class SSHCrabApplication extends Application {
 
         // 设置窗口关闭事件
         primaryStage.setOnCloseRequest(event -> {
-            hideWindow();
-            event.consume();
+            //如果未启动应用，则立即退出程序
+            if (!((SSHCrabController)fxmlLoader.getController()).isSSHRunning()) System.exit(0);
         });
 
         primaryStage.show();
-
-        // 创建系统托盘图标
-        createTrayIcon();
-    }
-
-    //创建图标
-    private void createTrayIcon() {
-        if (SystemTray.isSupported()) {
-            // 获取系统托盘
-            SystemTray tray = SystemTray.getSystemTray();
-            // 创建弹出菜单
-            PopupMenu popupMenu = new PopupMenu();
-            // 创建系统托盘图标
-            Image image = new Image(this.getClass().getResourceAsStream("/logo.png"));
-            TrayIcon trayIcon = new TrayIcon(SwingFXUtils.fromFXImage(image, null), "SSH Crab 远程发蟹 v2.0", popupMenu);
-            trayIcon.setImageAutoSize(true);
-            // 创建打开菜单项
-            MenuItem openMenuItem = new MenuItem("打开(Show)");
-
-            openMenuItem.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("Open测试");
-                    Platform.runLater(() -> {
-                        System.out.println("Open测试2");
-                        showWindow();
-                    });
-                }
-            });
-
-            // 创建退出菜单项
-            MenuItem exitMenuItem = new MenuItem(new String("退出(Quit)".getBytes(StandardCharsets.UTF_8)));
-            exitMenuItem.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("Exit测试");
-                    Platform.exit();
-                    tray.remove(trayIcon);
-                }
-            });
-
-            // 将菜单项添加到弹出菜单
-            popupMenu.add(openMenuItem);
-            popupMenu.add(exitMenuItem);
-            // 将弹出菜单设置到系统托盘图标
-            trayIcon.setPopupMenu(popupMenu);
-            // 将系统托盘图标添加到系统托盘
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException e) {
-                System.out.println("Failed to add tray icon.");
-            }
-
-            // 设置托盘图标双击事件
-            trayIcon.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    Platform.runLater(new Runnable() {
-                        public void run() {
-                            showWindow();
-                        }
-                    });
-                }
-            });
-        } else {
-            System.out.println("System tray is not supported.");
-        }
     }
 
     //打开窗口
@@ -150,6 +85,7 @@ public class SSHCrabApplication extends Application {
         }
         System.out.println("打开窗口");
     }
+
     //关闭窗口
     public static void hideWindow() {
         if (primaryStage != null) {

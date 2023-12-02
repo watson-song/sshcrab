@@ -4,7 +4,7 @@ import java.io.File;
 
 public class SSHConnectionParams {
     String privateKeyPath;
-    String knowHostsPath = "~/.ssh/known_hosts";
+    String knowHostsPath = "~\\.ssh\\known_hosts";
     String privateKeyPhrase;
     enum AuthType {
         key("SSH密钥登陆"),password("密码登陆");

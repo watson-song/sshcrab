@@ -3,6 +3,7 @@ package com.watsontech.tools.sshcrab2;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -14,6 +15,9 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -36,13 +40,37 @@ public class SSHCrabController {
     @FXML
     private TextField textFieldSSHHost,textFieldSSHPort,textFieldForwardHost,textFieldForwardPort,textFieldLocalHost,textFieldLocalPort,textFieldSSHKeyPath,textFieldSSHKeyPhrase,textFieldSSHHostUsername,textFieldSSHHostsPath;
 
-    static {
-        Platform.setImplicitExit(false);//隐式退出开关，设置关闭所有窗口后程序仍不退出
-    }
+    //是否已启动代理
+    private boolean sshRunning = false;
 
     @FXML
     protected void onConnectButtonClick(Event event) {
+        startRunning();
+    }
+
+    private void handleConnectException(Exception e) {
+        e.printStackTrace();
+
+        updateMessageLabel(String.format("启动失败：%s", e.getMessage()));
+        if (conexionssh!=null&&conexionssh.isConnected()) conexionssh.closeSSH();
+
+        buttonConnect.setVisible(true);
+        buttonStop.setVisible(false);
+        sshRunning = false;
+
+        createTrayIcon(sshRunning);
+
+        SSHCrabApplication.showWindow();
+    }
+
+    @FXML
+    protected void onStopButtonClick() {
+        stopRunning();
+    }
+
+    public void startRunning() {
         updateMessageLabel(String.format("SSH转发启动中..."));
+
         try {
             final SSHConnectionParams connectionParams = getParams();
             if (connectionParams!=null) {
@@ -52,6 +80,7 @@ public class SSHCrabController {
                     public void onConnected(Session session) {
                         SSHCrabController.this.buttonConnect.setVisible(false);
                         SSHCrabController.this.buttonStop.setVisible(true);
+                        sshRunning = true;
 
                         //更新配置到文件
                         saveConfigFile(connectionParams);
@@ -63,6 +92,7 @@ public class SSHCrabController {
                             updateMessageLabel(String.format("SSH端口转发已启动"));
                         }
 
+                        createTrayIcon(sshRunning);
                         SSHCrabApplication.hideWindow();
                     }
 
@@ -70,6 +100,9 @@ public class SSHCrabController {
                     public void onConnecteFailed(Session session) {
                         SSHCrabController.this.buttonConnect.setVisible(true);
                         SSHCrabController.this.buttonStop.setVisible(true);
+                        sshRunning = false;
+
+                        createTrayIcon(sshRunning);
 
                         updateMessageLabel(String.format("SSH端口连接失败"));
                     }
@@ -82,23 +115,112 @@ public class SSHCrabController {
         }
     }
 
-    private void handleConnectException(Exception e) {
-        e.printStackTrace();
+    public void stopRunning() {
+        conexionssh.closeSSH();
+        buttonConnect.setVisible(true);
+        buttonStop.setVisible(false);
+        sshRunning = false;
 
-        updateMessageLabel(String.format("启动失败：%s", e.getMessage()));
-        if (conexionssh!=null&&conexionssh.isConnected()) conexionssh.closeSSH();
-        SSHCrabController.this.buttonConnect.setVisible(true);
-        SSHCrabController.this.buttonStop.setVisible(false);
-
-        SSHCrabApplication.showWindow();
+        createTrayIcon(false);
+        updateMessageLabel(String.format("SSH端口转发停止"));
     }
 
-    @FXML
-    protected void onStopButtonClick() {
-        conexionssh.closeSSH();
-        SSHCrabController.this.buttonConnect.setVisible(true);
-        SSHCrabController.this.buttonStop.setVisible(false);
-        updateMessageLabel(String.format("SSH端口转发停止"));
+    public boolean isSSHRunning() {return sshRunning;}
+
+    private void clearAllTrayIcon(SystemTray tray) {
+        if (tray!=null) {
+            //清空所有系统托盘
+            TrayIcon[] allTrayIcons = tray.getTrayIcons();
+            if (allTrayIcons!=null&&allTrayIcons.length>0) {
+                for (int i = 0; i < allTrayIcons.length; i++) {
+                    tray.remove(allTrayIcons[i]);
+                }
+            }
+        }
+    }
+    //创建图标
+    private void createTrayIcon(boolean isSSHRunning) {
+        if (SystemTray.isSupported()) {
+            // 获取系统托盘
+            SystemTray tray = SystemTray.getSystemTray();
+
+            //清空所有系统托盘
+            clearAllTrayIcon(tray);
+
+            final TrayIcon appTrayIcon = new TrayIcon(SwingFXUtils.fromFXImage(new javafx.scene.image.Image(this.getClass().getResourceAsStream(isSSHRunning?"/active.png":"/inactive.png")), null), "SSH Crab 远程发蟹 v2.0" +(isSSHRunning?" - 运行中":""));
+
+            // 创建系统托盘图标
+            // 将弹出菜单设置到系统托盘图标
+            appTrayIcon.setPopupMenu(createPopupMenu(isSSHRunning));
+            appTrayIcon.setImageAutoSize(true);
+            // 将系统托盘图标添加到系统托盘
+            try {
+                tray.add(appTrayIcon);
+            } catch (AWTException e) {
+                System.out.println("Failed to add tray icon.");
+            }
+
+            // 设置托盘图标双击事件
+            appTrayIcon.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            SSHCrabApplication.showWindow();
+                        }
+                    });
+                }
+            });
+        } else {
+            System.out.println("System tray is not supported.");
+        }
+    }
+
+    private PopupMenu createPopupMenu(boolean isSSHRunning) {
+        // 创建弹出菜单
+        PopupMenu popupMenu = new PopupMenu();
+        // 创建启动菜单项
+        final MenuItem startMenuItem = new MenuItem(isSSHRunning?"停止(Stop)":"启动(Start)");
+
+        startMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(isSSHRunning) {
+                            stopRunning();
+                        }else {
+                            startRunning();
+                        }
+                    }
+                });
+            }
+        });
+
+        popupMenu.add(startMenuItem);
+        // 创建打开菜单项
+        MenuItem openMenuItem = new MenuItem("打开(Show)");
+        openMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Open测试");
+                SSHCrabApplication.showWindow();
+            }
+        });
+
+        // 创建退出菜单项
+        MenuItem exitMenuItem = new MenuItem("退出(Quit)");
+        exitMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Exit测试");
+
+                stopRunning();
+                System.exit(0);
+            }
+        });
+
+        // 将菜单项添加到弹出菜单
+        popupMenu.add(openMenuItem);
+        popupMenu.add(exitMenuItem);
+        return popupMenu;
     }
 
     @FXML
@@ -154,7 +276,7 @@ public class SSHCrabController {
             sshConnectionParams = PropertiesHelper.readPropertyFile(logger, configFilePath);
             if (sshConnectionParams!=null) {
                 if (sshConnectionParams.getConfigFile()!=null) {
-                    configFileChooseButton.setText(sshConnectionParams.getConfigFile().getName());
+                    labelConfigFileChoseLabel.setText(sshConnectionParams.getConfigFile().getName());
                     updateMessageLabel(String.format("已加载配置文件配置：%s", sshConnectionParams.getConfigFile().getAbsolutePath()));
                 }else {
                     updateMessageLabel(String.format("已加载配置文件配置：%s", configFilePath));

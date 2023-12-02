@@ -57,17 +57,17 @@
             <Label alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="242.0" text="SSH主机/端口" textAlignment="JUSTIFY" GridPane.rowIndex="1" />
             <Label alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="228.0" text="转发源地址/端口" textAlignment="JUSTIFY" GridPane.rowIndex="2" />
             <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="68.0" prefWidth="224.0" text="目标地址/端口" textAlignment="JUSTIFY" GridPane.rowIndex="3" />
-            <TextField fx:id="textFieldSSHHost" prefHeight="47.0" prefWidth="230.0" promptText="请输入SSH主机地址" text="qcloud_cloudhel" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField fx:id="textFieldSSHHost" prefHeight="47.0" prefWidth="230.0" promptText="请输入SSH主机地址" text="" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <TextField fx:id="textFieldSSHPort" prefHeight="47.0" prefWidth="230.0" promptText="端口" text="22" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-            <TextField fx:id="textFieldForwardHost" prefHeight="47.0" prefWidth="230.0" promptText="转发源地址" text="172.17.0.14" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField fx:id="textFieldForwardHost" prefHeight="47.0" prefWidth="230.0" promptText="转发源地址" text="" GridPane.columnIndex="2" GridPane.rowIndex="2" />
             <TextField fx:id="textFieldForwardPort" prefHeight="47.0" prefWidth="230.0" promptText="源端口" text="3306" GridPane.columnIndex="4" GridPane.rowIndex="2" />
             <TextField fx:id="textFieldLocalHost" prefHeight="47.0" prefWidth="85.0" promptText="目标地址" text="localhost" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <TextField fx:id="textFieldLocalPort" prefHeight="47.0" prefWidth="85.0" promptText="本地端口" text="3307" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-            <TextField fx:id="textFieldSSHKeyPath" prefHeight="47.0" prefWidth="85.0" promptText="SSH公钥地址" text="C:\Users\Watson\.ssh\qcloud.pem" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <TextField fx:id="textFieldLocalPort" prefHeight="47.0" prefWidth="85.0" promptText="本地端口" text="3306" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+            <TextField fx:id="textFieldSSHKeyPath" prefHeight="47.0" prefWidth="85.0" promptText="SSH公钥地址" text="~\.ssh\id_rsa" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Label alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="221.0" text="SSH私钥路径/密码" textAlignment="JUSTIFY" GridPane.rowIndex="4" />
             <PasswordField fx:id="textFieldSSHKeyPhrase" prefHeight="46.0" prefWidth="89.0" promptText="公钥密码" GridPane.columnIndex="4" GridPane.rowIndex="4" />
             <Label alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="229.0" text="SSHHost文件路径 主机账号" textAlignment="RIGHT" wrapText="true" GridPane.rowIndex="5" />
-            <TextField fx:id="textFieldSSHHostsPath" prefHeight="47.0" prefWidth="280.0" promptText="本地host文件路径" text="~/.ssh/known_hosts" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <TextField fx:id="textFieldSSHHostsPath" prefHeight="47.0" prefWidth="280.0" promptText="本地host文件路径" text="~\.ssh\known_hosts" GridPane.columnIndex="2" GridPane.rowIndex="5" />
             <TextField fx:id="textFieldSSHHostUsername" prefHeight="47.0" prefWidth="85.0" promptText="SSH账号" text="root" GridPane.columnIndex="4" GridPane.rowIndex="5" />
             <Label alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="242.0" text="选择配置文件" textAlignment="JUSTIFY" />
             <Button fx:id="configFileChooseButton" mnemonicParsing="false" onAction="#onConfigureFileChooseClick" prefHeight="36.0" prefWidth="274.0" text="选择" GridPane.columnIndex="4" />
