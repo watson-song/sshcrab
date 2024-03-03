@@ -38,4 +38,8 @@ username ssh用户名
 privateKeyPath@keyPhrase  私钥路径@密码(若有)
 #skp=~/.ssh/id_rsa@password
 
+打包步骤：
+1、javafx:jlink
+C:\Users\Watson\.jdks\corretto-17.0.3\bin\java.exe -Dmaven.multiModuleProjectDirectory=D:\JavaWorkspace\sshcrab "-Dmaven.home=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\bin\m2.conf" "-Dmaven.ext.class.path=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven-event-listener.jar" "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\lib\idea_rt.jar=44697:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\boot\plexus-classworlds-2.6.0.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\boot\plexus-classworlds.license" org.codehaus.classworlds.Launcher -Didea.version=2022.1.3 org.openjfx:javafx-maven-plugin:0.0.8:jlink
+2、jpackage 
 C:\Users\Watson\.jdks\corretto-17.0.3\bin\jpackage --name SSHCrab --app-version 2.0 --copyright 2023@WatsonTech.Ltd --description "SSHCrap V2.0" --vendor WatsonTech.Ltd --type msi --win-shortcut --win-menu --win-dir-chooser --icon src\main\resources\app.ico -m com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication --dest .\dist\ --runtime-image .\target\image

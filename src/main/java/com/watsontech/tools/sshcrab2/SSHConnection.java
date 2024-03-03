@@ -26,6 +26,8 @@ public class SSHConnection {
 
     private Session session; //represents each ssh session
     private SSHConnectionParams connectionParams;
+    private ConnectionCallback callback;
+    private JSch jsch;
     private volatile boolean isConnected = false;
 
     public void closeSSH() {
@@ -35,8 +37,25 @@ public class SSHConnection {
     }
 
     public synchronized void startSSH(int timeout, ConnectionCallback callback) throws JSchException {
+        this.callback = callback;
+        startSSH(timeout);
+
+        //启动定时发送keepalive心跳
+        runSendKeepAliveMsg();
+    }
+
+    public synchronized void startSSH(int timeout) throws JSchException {
         checkParams();
         logger.info("准备SSH远程连接 {}", connectionParams.getSshRemoteHost() + ":" + connectionParams.getRemoteSSHPort());//这里打印SSH服务器版本信息
+
+        session = jsch.getSession(connectionParams.getSshUserName(), connectionParams.getSshRemoteHost(), connectionParams.getRemoteSSHPort());
+        if(connectionParams.getAuthType()==null||connectionParams.getAuthType()== SSHConnectionParams.AuthType.password) {
+            session.setPassword(connectionParams.getPrivateKeyPhrase());
+        }
+
+        Properties config = new Properties();
+        config.put("StrictHostKeyChecking", "no");
+        session.setConfig(config);
 
         session.connect(timeout*1000); //ssh connection established!
         logger.info("SSH服务器版本 {}", session.getServerVersion());//这里打印SSH服务器版本信息
@@ -49,8 +68,6 @@ public class SSHConnection {
 
         isConnected = true;
 
-        //启动定时发送keepalive心跳
-        runSendKeepAliveMsg();
         if (callback!=null) {
             callback.onConnected(session);
         }
@@ -63,25 +80,39 @@ public class SSHConnection {
                 while (isConnected) {
                     logger.info("检查并发送存活跃连接...");
                     if (session!=null) {
-                        if (session.isConnected()) {
-                            try {
-                                session.sendKeepAliveMsg();
-                                logger.info("发送存活心跳连接");
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        try {
+                            if (session.isConnected()) {
+                                try {
+                                    session.sendKeepAliveMsg();
+                                    logger.info("发送存活心跳连接");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }else {
+                                logger.info("SSH服务已中断，立即重新连接 {}", session.getHost());//这里打印SSH服务器版本信息
+                                if (callback!=null) {
+                                    callback.onConnecteFailed(session);
+                                }
+
+                                try {
+                                    startSSH(6);
+    //                                session.connect(6000);
+                                } catch (JSchException e) {
+                                    e.printStackTrace();
+
+                                    if (callback!=null) {
+                                        callback.onConnecteFailed(session);
+                                    }
+                                }
                             }
-                        }else {
-                            logger.info("SSH服务已中断，立即重新连接 {}", session.getServerVersion());//这里打印SSH服务器版本信息
-                            try {
-                                session.connect(6000);
-                            } catch (JSchException e) {
-                                e.printStackTrace();
-                            }
+                        }catch (Exception ex) {
+                            ex.printStackTrace();
                         }
+
                     }
 
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -97,7 +128,7 @@ public class SSHConnection {
         connectionParams = params;
         checkParams();
 
-        JSch jsch = new JSch();
+        jsch = new JSch();
         JSch.setLogger(new com.jcraft.jsch.Logger() {
             @Override
             public boolean isEnabled(int level) {
@@ -123,15 +154,6 @@ public class SSHConnection {
 
             }
         }
-
-        session = jsch.getSession(connectionParams.getSshUserName(), connectionParams.getSshRemoteHost(), connectionParams.getRemoteSSHPort());
-        if(connectionParams.getAuthType()==null||connectionParams.getAuthType()== SSHConnectionParams.AuthType.password) {
-            session.setPassword(connectionParams.getPrivateKeyPhrase());
-        }
-
-        Properties config = new Properties();
-        config.put("StrictHostKeyChecking", "no");
-        session.setConfig(config);
     }
 
     private void checkParams() {

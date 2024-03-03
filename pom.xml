@@ -94,13 +94,12 @@
                         <configuration>
                             <mainClass>com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication
                             </mainClass>
-<!--                            <vendor>Watson Tech.Ltd</vendor>-->
-<!--                            <launcher>SSHCrab</launcher>-->
-<!--                            <jlinkZipName>SSHCrab</jlinkZipName>-->
-<!--                            <jlinkImageName>SSHCrab</jlinkImageName>-->
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <noHeaderFiles>true</noHeaderFiles>
+                            <vendor>Watson Tech.Ltd</vendor>
+                            <jlinkZipName>SSHCrab-V2.0</jlinkZipName>
+                            <jlinkImageName>image</jlinkImageName>
+<!--                            <noManPages>true</noManPages>-->
+<!--                            <stripDebug>true</stripDebug>-->
+<!--                            <noHeaderFiles>true</noHeaderFiles>-->
                         </configuration>
                     </execution>
                 </executions>
