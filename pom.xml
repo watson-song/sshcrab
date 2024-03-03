@@ -7,7 +7,7 @@
     <groupId>com.watsontech.tools</groupId>
     <artifactId>sshcrap2</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>sshcrab-2.0</name>
+    <name>sshcrab-2.0.1</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -95,7 +95,7 @@
                             <mainClass>com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication
                             </mainClass>
                             <vendor>Watson Tech.Ltd</vendor>
-                            <jlinkZipName>SSHCrab-V2.0</jlinkZipName>
+                            <jlinkZipName>SSHCrab-V2.0.1</jlinkZipName>
                             <jlinkImageName>image</jlinkImageName>
 <!--                            <noManPages>true</noManPages>-->
 <!--                            <stripDebug>true</stripDebug>-->
