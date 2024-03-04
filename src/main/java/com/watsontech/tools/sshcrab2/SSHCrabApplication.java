@@ -7,14 +7,16 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
 public class SSHCrabApplication extends Application {
 
     public enum OS {Mac, Windows, Linux}
+    static java.awt.Image statusBarIconImage, logoIconImage;
 
-    static OS currentOs = OS.Mac;
+    public static OS currentOs = OS.Mac;
     public static final String userHomeDir;
     public static final String userDir;
     public static final String userDefaultConfigDir;
@@ -23,15 +25,18 @@ public class SSHCrabApplication extends Application {
 
     //设置mac系统dock图标
     static {
+        // 加载一个图片用于托盘图标的显示
+        logoIconImage = loadIconImage();
+
         //获得操作系统
         String OsName = System.getProperty("os.name");
         //是mac 就设置dock图标
         if (OsName.contains("Mac")) {
             currentOs = OS.Mac;
 
-//            if(logoIconImage!=null) {
-//                UIExtensionApple.setDockIconImage(logoIconImage);
-//            }
+            if(logoIconImage!=null) {
+                UIExtensionApple.setDockIconImage(logoIconImage);
+            }
         }else if (OsName.contains("Windows")) {
             currentOs = OS.Windows;
         }else {
@@ -50,6 +55,16 @@ public class SSHCrabApplication extends Application {
 
     static {
         Platform.setImplicitExit(false);//隐式退出开关，设置关闭所有窗口后程序仍不退出
+    }
+
+    private static java.awt.Image loadIconImage() {
+        if(logoIconImage==null) {
+            // 加载一个图片用于托盘图标的显示
+            logoIconImage = Toolkit.getDefaultToolkit().getImage(SSHCrabApplication.class.getClassLoader().getResource("sshcrab.png"));
+            statusBarIconImage = Toolkit.getDefaultToolkit().getImage(SSHCrabApplication.class.getClassLoader().getResource("logo.png"));
+        }
+
+        return logoIconImage;
     }
 
     @Override

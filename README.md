@@ -16,10 +16,10 @@
 
 ##Mac app 下载
 
-[Download](https://github.com/watson-song/sshcrab/releases/download/1.0/SSH.Crab-Mac.zip)
+[Download](https://github.com/watson-song/sshcrab/releases/download/2.0.1.1/SSHCrab-2.0.dmg)
 
 ##PC 2.0 app 下载
-[Download](https://github.com/watson-song/sshcrab/releases/download/2.0/SSHCrab-2.0.msi)
+[Download](https://github.com/watson-song/sshcrab/releases/download/2.0.1/SSHCrab-2.0.1.msi)
 
 #使用手册
 
@@ -42,4 +42,8 @@ privateKeyPath@keyPhrase  私钥路径@密码(若有)
 1、javafx:jlink
 C:\Users\Watson\.jdks\corretto-17.0.3\bin\java.exe -Dmaven.multiModuleProjectDirectory=D:\JavaWorkspace\sshcrab "-Dmaven.home=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\bin\m2.conf" "-Dmaven.ext.class.path=C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven-event-listener.jar" "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\lib\idea_rt.jar=44697:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\boot\plexus-classworlds-2.6.0.jar;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2022.1.3\plugins\maven\lib\maven3\boot\plexus-classworlds.license" org.codehaus.classworlds.Launcher -Didea.version=2022.1.3 org.openjfx:javafx-maven-plugin:0.0.8:jlink
 2、jpackage 
+## win version
 C:\Users\Watson\.jdks\corretto-17.0.3\bin\jpackage --name SSHCrab --app-version 2.0 --copyright 2023@WatsonTech.Ltd --description "SSHCrap V2.0" --vendor WatsonTech.Ltd --type msi --win-shortcut --win-menu --win-dir-chooser --icon src\main\resources\app.ico -m com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication --dest .\dist\ --runtime-image .\target\image
+## mac version 
+/Users/watson/Library/Java/JavaVirtualMachines/openjdk-21.0.2/Contents/Home/bin/jpackage  --name SSHCrab --app-version 2.0 --copyright 2023@WatsonTech.Ltd --description "SSHCrap
+  V2.0" --vendor WatsonTech.Ltd  --icon src/main/resources/sshscrab-128mac.icns -m com.watsontech.tools.sshcrab2/com.watsontech.tools.sshcrab2.SSHCrabApplication --dest ./dist/ --runtime-image ./target/image

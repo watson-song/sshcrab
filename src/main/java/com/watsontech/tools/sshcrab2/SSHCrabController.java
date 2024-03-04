@@ -21,6 +21,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
+import static com.watsontech.tools.sshcrab2.SSHCrabApplication.currentOs;
+
 /**
  * Created by Watson on 2018/12/19.
  */
@@ -82,6 +84,10 @@ public class SSHCrabController {
                         SSHCrabController.this.buttonStop.setVisible(true);
                         sshRunning = true;
 
+                        if (currentOs== SSHCrabApplication.OS.Mac) {
+                            UIExtensionApple.updateDockerWord("起");
+                        }
+
                         //更新配置到文件
                         saveConfigFile(connectionParams);
 
@@ -121,6 +127,9 @@ public class SSHCrabController {
         buttonStop.setVisible(false);
         sshRunning = false;
 
+        if (currentOs == SSHCrabApplication.OS.Mac) {
+            UIExtensionApple.updateDockerWord("停");
+        }
         createTrayIcon(false);
         updateMessageLabel(String.format("SSH端口转发停止"));
     }
